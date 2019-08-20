@@ -14,6 +14,6 @@ server.get('/', (req, res) => {
 });
 
 // routes
-server.use('/users', usersRoute);
+server.use('/api', usersRoute);
 
 module.exports = server;
