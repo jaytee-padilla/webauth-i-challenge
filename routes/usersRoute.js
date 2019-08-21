@@ -44,6 +44,8 @@ router.post('/login', (req, res) => {
 	db.getByUsername(userAcc.username)
 		.then(user => {
 			if(user && bcrypt.compareSync(userAcc.password, user.password)) {
+				req.session.username = userAcc.username; // this only runs on successful login
+
 				res.status(200).json({message: `Welcome ${user.username}`});
 			} else {
 				res.status(404).json({message: 'Invalid login credentials'});
