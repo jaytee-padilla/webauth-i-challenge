@@ -19,6 +19,14 @@ router.get('/users', restricted, (req, res) => {
 		});
 });
 
+// logout
+router.get('/logout', (req, res) => {
+	req.session.destroy(function(error) {
+		res.status(200).json({message: 'You have been logged out'});
+	});
+});
+
+
 // POST
 // add user to database
 router.post('/register', (req, res) => {
@@ -58,8 +66,8 @@ router.post('/login', (req, res) => {
 });
 
 function restricted(req, res, next) {
-	// if user has logged in correctly, a 'username' variable will be stored in req.session
-	// if req.session.username exists, that means the user is logged in and has access to restricted data
+	// if user has logged in correctly, a 'loggedIn' variable stored in req.session will become true
+	// if req.session.loggedIn exists and is true, that means the user is logged in and has access to restricted data
 	if(req.session && req.session.loggedIn) {
 		next();
 	} else {

@@ -1,6 +1,7 @@
 const express = require('express');
 const helmet = require('helmet');
 const session = require('express-session');
+const knexSessionStore = require('connect-session-knex')(session); // remember to pass the session into this
 const usersRoute = require('./routes/usersRoute');
 
 const db = require('./data/db-config');
@@ -17,7 +18,12 @@ const sessionOptions = {
 		httpOnly: true // client JS has no access to cookie
 	},
 	resave: false,
-	saveUninitialized: true
+	saveUninitialized: true,
+	store: new knexSessionStore({
+		knex: db,
+		createtable: true,
+		clearInterval: 1000 * 60 * 60, // how long before we clear out expired sessions
+	})
 }
 
 const server = express();
@@ -27,7 +33,7 @@ server.use(session(sessionOptions)); // <<<< This is how to use the session
 
 // check if API is running
 server.get('/', (req, res) => {
-	res.json({api: 'up', session: req.session});
+	res.json({api: 'running', session: req.session});
 });
 
 // routes
