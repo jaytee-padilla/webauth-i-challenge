@@ -44,7 +44,8 @@ router.post('/login', (req, res) => {
 	db.getByUsername(userAcc.username)
 		.then(user => {
 			if(user && bcrypt.compareSync(userAcc.password, user.password)) {
-				req.session.username = userAcc.username; // this only runs on successful login
+				// req.session.username = userAcc.username;
+				req.session.loggedIn = true;
 
 				res.status(200).json({message: `Welcome ${user.username}`});
 			} else {
@@ -57,26 +58,12 @@ router.post('/login', (req, res) => {
 });
 
 function restricted(req, res, next) {
-	let userAcc = req.headers;
-
-	// check if username & password for login account has been provided
-	// if so, proceed with login validation, if not, throw error
-	if(userAcc.username && userAcc.password) {
-		// validates the logged in user's credentials
-		db.getByUsername(userAcc.username)
-			.then(user => {
-				if(user && bcrypt.compareSync(userAcc.password, user.password)) {
-					// if the login credentials are valid, proceed with CRUD functionality
-					next();
-				} else {
-					res.status(404).json({message: 'Invalid login credentials'});
-				}
-			})
-			.catch(error => {
-				res.status(400).json({message: 'Could not retrieve data from database'});
-			})
+	// if user has logged in correctly, a 'username' variable will be stored in req.session
+	// if req.session.username exists, that means the user is logged in and has access to restricted data
+	if(req.session && req.session.loggedIn) {
+		next();
 	} else {
-		res.status(400).json({message: 'Please provide valid login credentials'});
+		res.status(404).json({message: 'Invalid login credentials'});
 	}
 }
 
